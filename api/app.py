@@ -1,4 +1,4 @@
-"""FastAPI service for the Recommendation Engine."""
+"""FastAPI service for the AI Recommendation Engine."""
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -8,7 +8,11 @@ import time
 
 from main import RecommendationEngine
 
-app = FastAPI(title="AI Recommendation Engine API", version="1.0.0")
+app = FastAPI(
+    title="AI Recommendation Engine API",
+    description="Hybrid recommendation system with collaborative filtering",
+    version="1.0.0"
+)
 
 app.add_middleware(
     CORSMiddleware,
@@ -74,8 +78,3 @@ async def recommend(request: RecommendRequest):
 @app.get("/health")
 async def health():
     return {"status": "healthy", "trained": engine.is_trained}
-
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8080)
