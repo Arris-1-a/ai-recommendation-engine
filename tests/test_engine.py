@@ -49,9 +49,9 @@ class TestRecommendationEngine:
             {"user_id": "u3", "item_id": "i5", "rating": 5.0},
         ]
         metrics = engine.evaluate(test_data)
-        assert "hit_rate_at_1" in metrics
-        assert "hit_rate_at_5" in metrics
-        assert "mrr" in metrics
+        assert metrics.hit_rate_at_1 is not None
+        assert metrics.hit_rate_at_5 is not None
+        assert metrics.mrr is not None
 
     def test_context_recommendation(self, engine):
         result = engine.recommend("u1", context={"popularity_boost": 0.1})
@@ -92,8 +92,8 @@ class TestItemBasedCF:
             Rating("u2", "i1", 3.0),
         ]
         cf.fit(ratings, 2)
-        assert "i1" in cf.reverse_item_map
-        assert "i2" in cf.reverse_item_map
+        assert "i1" in cf.reverse_item_map.values()
+        assert "i2" in cf.reverse_item_map.values()
 
 
 class TestContentRecommender:

@@ -12,6 +12,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from typing import Dict, List, Optional, Tuple, Any, Set
 from dataclasses import dataclass, field
 from collections import defaultdict, Counter
+from pathlib import Path
 import logging
 import time
 from datetime import datetime
@@ -427,8 +428,8 @@ class MatrixFactorization:
                           for idx, r in rating_list if idx == i]
                 if users_i:
                     user_vecs = self.user_factors[users_i]
-                    ratings_i = [rating_dict[u][[idx for idx, r in rating_dict[u] if idx == i][0]][1]
-                                 for u in users_i]
+                    ratings_i = [r for u in users_i
+                                 for idx, r in rating_dict[u] if idx == i]
                     self.item_factors[i] = self._update_factor(
                         user_vecs, ratings_i, self.item_factors[i]
                     )
