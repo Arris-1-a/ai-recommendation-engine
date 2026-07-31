@@ -1,0 +1,28 @@
+{
+  "users": [
+    {"id": "user_001", "name": "Alice Johnson", "email": "alice@example.com", "age": 28},
+    {"id": "user_002", "name": "Bob Smith", "email": "bob@example.com", "age": 35},
+    {"id": "user_003", "name": "Carol White", "email": "carol@example.com", "age": 42},
+    {"id": "user_004", "name": "David Lee", "email": "david@example.com", "age": 31},
+    {"id": "user_005", "name": "Eve Brown", "email": "eve@example.com", "age": 26}
+  ],
+  "products": [
+    {"id": "prod_001", "name": "Laptop Pro", "category": "electronics", "price": 1299.99},
+    {"id": "prod_002", "name": "Wireless Mouse", "category": "electronics", "price": 29.99},
+    {"id": "prod_003", "name": "Office Chair", "category": "furniture", "price": 299.99},
+    {"id": "prod_004", "name": "Standing Desk", "category": "furniture", "price": 599.99},
+    {"id": "prod_005", "name": "Monitor 27\"", "category": "electronics", "price": 449.99}
+  ],
+  "ratings": [
+    {"user_id": "user_001", "product_id": "prod_001", "rating": 5.0, "timestamp": 1690000000},
+    {"user_id": "user_001", "product_id": "prod_002", "rating": 4.0, "timestamp": 1690100000},
+    {"user_id": "user_002", "product_id": "prod_001", "rating": 4.0, "timestamp": 1690200000},
+    {"user_id": "user_002", "product_id": "prod_003", "rating": 5.0, "timestamp": 1690300000},
+    {"user_id": "user_003", "product_id": "prod_004", "rating": 5.0, "timestamp": 1690400000},
+    {"user_id": "user_003", "product_id": "prod_005", "rating": 4.0, "timestamp": 1690500000},
+    {"user_id": "user_004", "product_id": "prod_002", "rating": 5.0, "timestamp": 1690600000},
+    {"user_id": "user_004", "product_id": "prod_003", "rating": 3.0, "timestamp": 1690700000},
+    {"user_id": "user_005", "product_id": "prod_001", "rating": 4.0, "timestamp": 1690800000},
+    {"user_id": "user_005", "product_id": "prod_005", "rating": 5.0, "timestamp": 1690900000}
+  ]
+}
