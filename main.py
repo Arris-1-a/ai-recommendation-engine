@@ -1150,3 +1150,38 @@ class ConfigManager:
         if max_len <= 0:
             errors.append("max_content_length must be positive")
         return errors
+
+
+class ContextManager:
+    """Manage conversational context."""
+    
+    def __init__(self, max_turns: int = 5):
+        self.max_turns = max_turns
+        self.contexts: Dict[str, List[Dict]] = {}
+    
+    def add_turn(self, conv_id: str, question: str, answer: str) -> None:
+        """Add a conversation turn."""
+        if conv_id not in self.contexts:
+            self.contexts[conv_id] = []
+        self.contexts[conv_id].append({
+            'question': question,
+            'answer': answer,
+            'timestamp': datetime.now().isoformat()
+        })
+        # Keep only last N turns
+        if len(self.contexts[conv_id]) > self.max_turns:
+            self.contexts[conv_id] = self.contexts[conv_id][-self.max_turns:]
+    
+    def get_context(self, conv_id: str) -> str:
+        """Get conversation context."""
+        if conv_id not in self.contexts:
+            return ""
+        turns = self.contexts[conv_id]
+        return "\n".join(f"Q: {t['question']}\nA: {t['answer']}" for t in turns)
+    
+    def clear(self, conv_id: str) -> bool:
+        """Clear context."""
+        if conv_id in self.contexts:
+            del self.contexts[conv_id]
+            return True
+        return False
