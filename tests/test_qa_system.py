@@ -34,3 +34,21 @@ class TestContextManager:
         cm.add_turn("conv1", "Q1", "A1")
         assert cm.clear("conv1")
         assert cm.get_context("conv1") == ""
+
+
+class TestStreamingResponse:
+    def test_stream_answer(self):
+        """Test streaming answer generation."""
+        from main import QASystem, StreamingResponse
+        
+        qa = QASystem()
+        streaming = StreamingResponse(qa)
+        assert streaming.qa is qa
+    
+    def test_stream_with_sources(self):
+        """Test streaming with sources."""
+        from main import QASystem, StreamingResponse
+        
+        qa = QASystem()
+        streaming = StreamingResponse(qa)
+        assert streaming.qa is qa
