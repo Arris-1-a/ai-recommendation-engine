@@ -1614,3 +1614,50 @@ class RAGEnhancer:
             'avg_confidence': sum(r['confidence'] for r in results) / len(results) if results else 0,
             'results': results
         }
+
+
+class ModelEnsemble:
+    """Ensemble multiple recommendation models."""
+    
+    def __init__(self):
+        self.models: List[RecommendationEngine] = []
+        self.weights: List[float] = []
+    
+    def add_model(self, engine: RecommendationEngine, weight: float = 1.0):
+        """Add a model to ensemble."""
+        self.models.append(engine)
+        self.weights.append(weight)
+    
+    def recommend(self, user_id: str, n_recommendations: int = 10) -> RecommendationResult:
+        """Get ensemble recommendations."""
+        if not self.models:
+            return RecommendationResult(user_id=user_id, items=[], strategy="empty_ensemble")
+        
+        # Get recommendations from each model
+        all_results = []
+        for model in self.models:
+            try:
+                result = model.recommend(user_id, n_recommendations)
+                all_results.append((result, self.weights[self.models.index(model)]))
+            except Exception as e:
+                logger.warning(f"Model failed: {e}")
+        
+        if not all_results:
+            return RecommendationResult(user_id=user_id, items=[], strategy="ensemble_failed")
+        
+        # Combine results
+        combined_scores: Dict[str, float] = defaultdict(float)
+        total_weight = sum(w for _, w in all_results)
+        
+        for result, weight in all_results:
+            for item_id, score in result.items:
+                combined_scores[item_id] += score * (weight / total_weight)
+        
+        # Sort and return
+        ranked = sorted(combined_scores.items(), key=lambda x: x[1], reverse=True)[:n_recommendations]
+        return RecommendationResult(
+            user_id=user_id,
+            items=ranked,
+            strategy="ensemble",
+            total_candidates=len(combined_scores)
+        )
