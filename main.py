@@ -1494,3 +1494,48 @@ class OnlineLearner:
     def get_update_count(self) -> int:
         """Get number of updates."""
         return len(self.engine.hybrid.ratings_cache)
+
+
+class PipelineOptimizer:
+    """Optimize document processing pipeline."""
+    
+    def __init__(self, processor: DocumentProcessor):
+        self.processor = processor
+        self.optimization_history: List[Dict] = []
+    
+    def optimize(self, documents: List[str]) -> Dict:
+        """Find optimal processing parameters."""
+        results = []
+        for doc in documents:
+            result = self.processor.process_file(doc)
+            results.append({
+                'filename': result.filename,
+                'processing_time_ms': result.statistics.get('processing_time_ms', 0),
+                'entity_count': len(result.entities)
+            })
+        
+        # Calculate optimization metrics
+        avg_time = sum(r['processing_time_ms'] for r in results) / len(results)
+        total_entities = sum(r['entity_count'] for r in results)
+        
+        optimization = {
+            'avg_processing_time_ms': avg_time,
+            'total_entities_extracted': total_entities,
+            'suggestions': []
+        }
+        
+        if avg_time > 1000:
+            optimization['suggestions'].append("Consider using batch processing for better performance")
+        if total_entities < len(documents) * 5:
+            optimization['suggestions'].append("Entity extraction threshold may need adjustment")
+        
+        self.optimization_history.append(optimization)
+        return optimization
+    
+    def get_recommendations(self) -> List[str]:
+        """Get processing recommendations."""
+        if not self.optimization_history:
+            return ["No optimization data available"]
+        
+        latest = self.optimization_history[-1]
+        return latest.get('suggestions', [])
