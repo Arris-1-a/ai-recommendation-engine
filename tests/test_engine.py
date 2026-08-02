@@ -172,3 +172,24 @@ class TestModelProfiler:
         profiler = ModelProfiler(engine)
         # Skip actual profiling for now
         assert profiler.engine is not None
+
+
+class TestConfigManager:
+    def test_default_config(self):
+        """Test default configuration."""
+        from main import ConfigManager
+        config = ConfigManager()
+        assert config.get('processing.max_content_length') == 1000000
+    
+    def test_get_nested(self):
+        """Test getting nested config values."""
+        from main import ConfigManager
+        config = ConfigManager()
+        assert config.get('nlp.sentiment_threshold') == 0.1
+    
+    def test_validate(self):
+        """Test config validation."""
+        from main import ConfigManager
+        config = ConfigManager()
+        errors = config.validate()
+        assert len(errors) == 0
