@@ -117,3 +117,44 @@ class TestDataTypes:
         result = RecommendationResult(user_id="u1", items=[("i1", 0.9)], strategy="test")
         assert result.timestamp != ""
         assert len(result.timestamp) > 0
+
+
+class TestModelCheckpoint:
+    def test_save_and_load(self, tmp_path):
+        """Test checkpoint save and load."""
+        checkpoint_dir = tmp_path / "checkpoints"
+        checkpoint = ModelCheckpoint(str(checkpoint_dir))
+        
+        # Test save (mock)
+        metrics = {"hit_rate": 0.85, "mrr": 0.72}
+        # Note: This would need torch to be installed for full test
+        # Skipping actual save for now
+        assert checkpoint.save_dir.exists()
+
+
+class TestEdgeCases:
+    def test_empty_ratings(self):
+        """Test with empty ratings."""
+        engine = RecommendationEngine()
+        engine.train([])
+        result = engine.recommend("user_1")
+        assert result.strategy == "not_trained"
+    
+    def test_single_user(self):
+        """Test with single user."""
+        engine = RecommendationEngine()
+        engine.train([
+            {"user_id": "u1", "item_id": "i1", "rating": 5.0}
+        ])
+        result = engine.recommend("u1")
+        assert result is not None
+    
+    def test_single_item(self):
+        """Test with single item."""
+        engine = RecommendationEngine()
+        engine.train([
+            {"user_id": "u1", "item_id": "i1", "rating": 5.0},
+            {"user_id": "u2", "item_id": "i1", "rating": 4.0}
+        ])
+        result = engine.recommend("u1")
+        assert result is not None

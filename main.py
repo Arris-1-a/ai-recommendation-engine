@@ -909,3 +909,33 @@ def demo():
 
 if __name__ == "__main__":
     demo()
+
+
+class ModelCheckpoint:
+    """Save and load model checkpoints."""
+    
+    def __init__(self, save_dir: str = "checkpoints"):
+        self.save_dir = Path(save_dir)
+        self.save_dir.mkdir(parents=True, exist_ok=True)
+    
+    def save(self, engine: RecommendationEngine, epoch: int, metrics: Dict) -> str:
+        """Save model checkpoint."""
+        filename = f"checkpoint_epoch_{epoch}.pth"
+        filepath = self.save_dir / filename
+        
+        checkpoint = {
+            'epoch': epoch,
+            'model_state': engine.hybrid.state_dict() if hasattr(engine.hybrid, 'state_dict') else {},
+            'metrics': metrics,
+            'timestamp': datetime.now().isoformat()
+        }
+        
+        torch.save(checkpoint, filepath)
+        logger.info(f"Checkpoint saved: {filepath}")
+        return str(filepath)
+    
+    def load(self, filepath: str) -> Dict:
+        """Load model checkpoint."""
+        checkpoint = torch.load(filepath, map_location='cpu')
+        logger.info(f"Checkpoint loaded: {filepath}")
+        return checkpoint
