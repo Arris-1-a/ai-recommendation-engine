@@ -1474,3 +1474,23 @@ class KnowledgeGraph:
             'edges': len(self.edges),
             'types': list(set(n['type'] for n in self.nodes.values()))
         }
+
+
+class OnlineLearner:
+    """Online learning for recommendation engine."""
+    
+    def __init__(self, engine: RecommendationEngine):
+        self.engine = engine
+        self.learning_rate = 0.01
+    
+    def update(self, user_id: str, item_id: str, rating: float):
+        """Update model with new rating."""
+        # In production, this would update model weights
+        # For now, just add to cache
+        rating_obj = Rating(user_id=user_id, item_id=item_id, rating=rating)
+        self.engine.hybrid.ratings_cache.append(rating_obj)
+        logger.info(f"Updated model with rating: {user_id} -> {item_id} = {rating}")
+    
+    def get_update_count(self) -> int:
+        """Get number of updates."""
+        return len(self.engine.hybrid.ratings_cache)
