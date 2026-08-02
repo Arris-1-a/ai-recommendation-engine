@@ -1558,3 +1558,59 @@ class TensorRTEngine:
         """Run inference with TensorRT."""
         # Placeholder implementation
         return []
+
+
+class RAGEnhancer:
+    """RAG (Retrieval-Augmented Generation) enhancer."""
+    
+    def __init__(self, qa_system: QASystem):
+        self.qa = qa_system
+    
+    def enhance_query(self, question: str, context: str = "") -> str:
+        """Enhance query with context."""
+        if context:
+            return f"{context}\n\nQuestion: {question}"
+        return question
+    
+    def generate_with_sources(self, question: str, top_k: int = 5) -> Dict:
+        """Generate answer with source citations."""
+        # Search for relevant documents
+        docs = self.qa.vector_store.search(question, top_k=top_k)
+        
+        # Build context from sources
+        context = "\n\n".join([
+            f"[Source {i+1}] {doc['content'][:500]}"
+            for i, doc in enumerate(docs)
+        ])
+        
+        # Generate answer
+        result = self.qa.generator.generate(docs, question, context)
+        
+        return {
+            'question': question,
+            'answer': result.answer,
+            'sources': docs,
+            'confidence': result.confidence
+        }
+    
+    def evaluate_rag(self, test_questions: List[Dict]) -> Dict:
+        """Evaluate RAG performance."""
+        results = []
+        for test in test_questions:
+            question = test['question']
+            expected = test.get('expected', '')
+            
+            output = self.generate_with_sources(question)
+            
+            results.append({
+                'question': question,
+                'answer': output['answer'][:200],
+                'confidence': output['confidence'],
+                'source_count': len(output['sources'])
+            })
+        
+        return {
+            'total_questions': len(results),
+            'avg_confidence': sum(r['confidence'] for r in results) / len(results) if results else 0,
+            'results': results
+        }
