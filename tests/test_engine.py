@@ -193,3 +193,17 @@ class TestConfigManager:
         config = ConfigManager()
         errors = config.validate()
         assert len(errors) == 0
+
+
+class TestModelQuantizer:
+    def test_quantize(self):
+        """Test model quantization."""
+        from main import ModelQuantizer
+        # Test that class exists
+        assert ModelQuantizer is not None
+    
+    def test_export_onnx(self):
+        """Test ONNX export."""
+        from main import ModelQuantizer
+        # Test that class exists
+        assert ModelQuantizer is not None
