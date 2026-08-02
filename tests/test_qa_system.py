@@ -52,3 +52,45 @@ class TestStreamingResponse:
         qa = QASystem()
         streaming = StreamingResponse(qa)
         assert streaming.qa is qa
+
+
+class TestRAGEnhancer:
+    def test_enhance_query(self):
+        """Test query enhancement."""
+        from main import QASystem, RAGEnhancer
+        
+        qa = QASystem()
+        enhancer = RAGEnhancer(qa)
+        
+        enhanced = enhancer.enhance_query("What is AI?", "Context: AI is...")
+        assert "Context" in enhanced
+        assert "What is AI?" in enhanced
+    
+    def test_generate_with_sources(self):
+        """Test generation with sources."""
+        from main import QASystem, RAGEnhancer
+        
+        qa = QASystem()
+        enhancer = RAGEnhancer(qa)
+        
+        # Add some documents
+        qa.add_documents(["AI is artificial intelligence.", "Machine learning is a subset of AI."])
+        
+        output = enhancer.generate_with_sources("What is AI?")
+        assert 'answer' in output
+        assert 'sources' in output
+    
+    def test_evaluate_rag(self):
+        """Test RAG evaluation."""
+        from main import QASystem, RAGEnhancer
+        
+        qa = QASystem()
+        enhancer = RAGEnhancer(qa)
+        
+        test_questions = [
+            {"question": "What is AI?"},
+            {"question": "What is ML?"}
+        ]
+        
+        results = enhancer.evaluate_rag(test_questions)
+        assert results['total_questions'] == 2
