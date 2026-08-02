@@ -1036,3 +1036,37 @@ class DataExporter:
                     f.write(f"- [{e.type}] {e.text}\n")
                 f.write("\n---\n\n")
         return output_path
+
+
+class ResultCache:
+    """Cache for processed results."""
+    
+    def __init__(self, max_size: int = 100):
+        self.max_size = max_size
+        self._cache: Dict[str, Any] = {}
+    
+    def get(self, key: str) -> Optional[Any]:
+        """Get cached result."""
+        return self._cache.get(key)
+    
+    def set(self, key: str, value: Any) -> None:
+        """Cache a result."""
+        if len(self._cache) >= self.max_size:
+            # Remove oldest
+            oldest = next(iter(self._cache))
+            del self._cache[oldest]
+        self._cache[key] = value
+    
+    def invalidate(self, key: str) -> bool:
+        """Remove a cache entry."""
+        if key in self._cache:
+            del self._cache[key]
+            return True
+        return False
+    
+    def clear(self) -> None:
+        """Clear all cache."""
+        self._cache.clear()
+    
+    def __len__(self) -> int:
+        return len(self._cache)
