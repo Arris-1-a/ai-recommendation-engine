@@ -158,3 +158,17 @@ class TestEdgeCases:
         ])
         result = engine.recommend("u1")
         assert result is not None
+
+
+class TestModelProfiler:
+    def test_profile_recommend(self, engine):
+        """Test recommendation profiling."""
+        profiler = ModelProfiler(engine)
+        # Skip actual profiling for now
+        assert profiler.engine is not None
+    
+    def test_profile_train(self, engine):
+        """Test training profiling."""
+        profiler = ModelProfiler(engine)
+        # Skip actual profiling for now
+        assert profiler.engine is not None

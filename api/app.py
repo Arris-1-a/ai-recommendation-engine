@@ -78,3 +78,24 @@ async def recommend(request: RecommendRequest):
 @app.get("/health")
 async def health():
     return {"status": "healthy", "trained": engine.is_trained}
+
+
+@app.get("/evaluate")
+async def evaluate(user_id: str, n_recommendations: int = 10):
+    """Get evaluation metrics for a user."""
+    if not engine.is_trained:
+        raise HTTPException(status_code=400, detail="Model not trained")
+    
+    result = engine.recommend(user_id, n_recommendations)
+    return {
+        'user_id': user_id,
+        'recommendations': result.items,
+        'strategy': result.strategy,
+        'total_candidates': result.total_candidates
+    }
+
+
+@app.get("/statistics")
+async def get_statistics():
+    """Get engine statistics."""
+    return engine.get_statistics()

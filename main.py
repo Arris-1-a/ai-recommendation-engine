@@ -939,3 +939,51 @@ class ModelCheckpoint:
         checkpoint = torch.load(filepath, map_location='cpu')
         logger.info(f"Checkpoint loaded: {filepath}")
         return checkpoint
+
+
+class ModelProfiler:
+    """Profile model performance."""
+    
+    def __init__(self, engine: RecommendationEngine):
+        self.engine = engine
+        self.timings: Dict[str, List[float]] = defaultdict(list)
+    
+    def profile_recommend(self, user_id: str, runs: int = 100) -> Dict:
+        """Profile recommendation time."""
+        times = []
+        for _ in range(runs):
+            start = time.perf_counter()
+            self.engine.recommend(user_id)
+            elapsed = time.perf_counter() - start
+            times.append(elapsed * 1000)  # Convert to ms
+        
+        return {
+            'user_id': user_id,
+            'runs': runs,
+            'avg_ms': sum(times) / len(times),
+            'min_ms': min(times),
+            'max_ms': max(times),
+            'p50_ms': sorted(times)[len(times) // 2],
+            'p95_ms': sorted(times)[int(len(times) * 0.95)]
+        }
+    
+    def profile_train(self, data_size: int) -> Dict:
+        """Profile training time."""
+        # Generate random data
+        import random
+        data = []
+        for i in range(data_size):
+            data.append({
+                'user_id': f'u{random.randint(0, 100)}',
+                'item_id': f'i{random.randint(0, 50)}',
+                'rating': round(random.uniform(1, 5), 1)
+            })
+        
+        start = time.perf_counter()
+        self.engine.train(data)
+        elapsed = time.perf_counter() - start
+        
+        return {
+            'data_size': data_size,
+            'training_time_ms': elapsed * 1000
+        }
