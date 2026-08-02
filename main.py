@@ -987,3 +987,52 @@ class ModelProfiler:
             'data_size': data_size,
             'training_time_ms': elapsed * 1000
         }
+
+
+class DataExporter:
+    """Export processed data to various formats."""
+    
+    def __init__(self, processor: DocumentProcessor):
+        self.processor = processor
+    
+    def export_json(self, output_path: str) -> str:
+        """Export results to JSON."""
+        data = [r.to_dict() for r in self.processor.results]
+        with open(output_path, 'w', encoding='utf-8') as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+        return output_path
+    
+    def export_csv(self, output_path: str) -> str:
+        """Export results to CSV."""
+        if not self.processor.results:
+            return ""
+        
+        import csv
+        fieldnames = ['filename', 'doc_type', 'summary', 'entities', 'keywords']
+        with open(output_path, 'w', newline='', encoding='utf-8') as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()
+            for r in self.processor.results:
+                writer.writerow({
+                    'filename': r.filename,
+                    'doc_type': r.doc_type,
+                    'summary': r.summary[:200],
+                    'entities': '; '.join([e.text for e in r.entities]),
+                    'keywords': '; '.join([k for k, _ in r.keywords[:10]])
+                })
+        return output_path
+    
+    def export_markdown(self, output_path: str) -> str:
+        """Export results to Markdown."""
+        with open(output_path, 'w', encoding='utf-8') as f:
+            f.write("# Document Processing Report\n\n")
+            for r in self.processor.results:
+                f.write(f"## {r.filename}\n\n")
+                f.write(f"**Type:** {r.doc_type}\n\n")
+                f.write(f"**Words:** {r.metadata.word_count}\n\n")
+                f.write(f"**Summary:**\n\n{r.summary}\n\n")
+                f.write(f"**Entities:**\n\n")
+                for e in r.entities[:10]:
+                    f.write(f"- [{e.type}] {e.text}\n")
+                f.write("\n---\n\n")
+        return output_path
