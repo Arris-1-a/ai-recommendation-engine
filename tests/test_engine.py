@@ -207,3 +207,29 @@ class TestModelQuantizer:
         from main import ModelQuantizer
         # Test that class exists
         assert ModelQuantizer is not None
+
+
+class TestModelEnsemble:
+    def test_add_model(self):
+        """Test adding models to ensemble."""
+        from main import ModelEnsemble, RecommendationEngine
+        
+        ensemble = ModelEnsemble()
+        engine = RecommendationEngine()
+        ensemble.add_model(engine, weight=1.0)
+        
+        assert len(ensemble.models) == 1
+        assert ensemble.weights == [1.0]
+    
+    def test_recommend(self):
+        """Test ensemble recommendation."""
+        from main import ModelEnsemble, RecommendationEngine
+        
+        ensemble = ModelEnsemble()
+        engine = RecommendationEngine()
+        engine.train([{"user_id": "u1", "item_id": "i1", "rating": 5.0}])
+        ensemble.add_model(engine)
+        
+        result = ensemble.recommend("u1", n_recommendations=5)
+        assert result.user_id == "u1"
+        assert result.strategy == "ensemble"
