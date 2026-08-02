@@ -1091,3 +1091,62 @@ class ModelExporter:
         # This would require TensorRT installation
         logger.warning("TensorRT export requires additional setup")
         return output_path
+
+
+class ConfigManager:
+    """Manage configuration with validation."""
+    
+    DEFAULT_CONFIG = {
+        'processing': {
+            'max_content_length': 1000000,
+            'summary_max_sentences': 5,
+            'min_word_length': 3
+        },
+        'nlp': {
+            'entity_types': ['EMAIL', 'PHONE', 'DATE', 'URL'],
+            'sentiment_threshold': 0.1
+        },
+        'output': {
+            'formats': ['json', 'csv'],
+            'encoding': 'utf-8'
+        }
+    }
+    
+    def __init__(self, config_path: str = None):
+        self.config = self.DEFAULT_CONFIG.copy()
+        if config_path:
+            self.load(config_path)
+    
+    def load(self, path: str) -> None:
+        """Load config from file."""
+        import yaml
+        with open(path, 'r') as f:
+            user_config = yaml.safe_load(f)
+        self._merge(self.config, user_config)
+    
+    def _merge(self, base: dict, override: dict) -> None:
+        """Recursively merge configs."""
+        for key, value in override.items():
+            if key in base and isinstance(base[key], dict) and isinstance(value, dict):
+                self._merge(base[key], value)
+            else:
+                base[key] = value
+    
+    def get(self, key: str, default: Any = None) -> Any:
+        """Get config value."""
+        keys = key.split('.')
+        value = self.config
+        for k in keys:
+            if isinstance(value, dict):
+                value = value.get(k, default)
+            else:
+                return default
+        return value
+    
+    def validate(self) -> List[str]:
+        """Validate configuration."""
+        errors = []
+        max_len = self.get('processing.max_content_length', 1000000)
+        if max_len <= 0:
+            errors.append("max_content_length must be positive")
+        return errors
