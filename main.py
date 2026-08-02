@@ -1383,3 +1383,27 @@ class ImageStatistics:
         stats['histogram_bins'] = int(hist.size)
         
         return stats
+
+
+class ParallelProcessor:
+    """Parallel document processing with multiprocessing."""
+    
+    def __init__(self, processor: DocumentProcessor, num_workers: int = 4):
+        self.processor = processor
+        self.num_workers = num_workers
+    
+    def process_parallel(self, filepaths: List[str]) -> List[ProcessingResult]:
+        """Process documents in parallel."""
+        from concurrent.futures import ProcessPoolExecutor, as_completed
+        
+        results = []
+        with ProcessPoolExecutor(max_workers=self.num_workers) as executor:
+            futures = {executor.submit(self.processor.process_file, fp): fp 
+                      for fp in filepaths}
+            for future in as_completed(futures):
+                try:
+                    result = future.result()
+                    results.append(result)
+                except Exception as e:
+                    logger.error(f"Processing failed: {e}")
+        return results
