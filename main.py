@@ -1292,3 +1292,42 @@ class StreamingResponse:
         # Then yield answer
         async for chunk in self.stream_answer(question):
             yield chunk
+
+
+class ModelComparator:
+    """Compare different recommendation models."""
+    
+    def __init__(self, engine: RecommendationEngine):
+        self.engine = engine
+    
+    def compare_strategies(self, user_id: str, test_data: List[Dict]) -> Dict:
+        """Compare different recommendation strategies."""
+        results = {}
+        
+        # User-Based CF
+        try:
+            user_cf = UserBasedCF()
+            ratings = [Rating(r['user_id'], r['item_id'], r['rating']) for r in test_data]
+            user_cf.fit(ratings, len(set(r['user_id'] for r in test_data)), 
+                       len(set(r['item_id'] for r in test_data)))
+            recs = user_cf.recommend(user_id, n_recommendations=10)
+            results['user_cf'] = {
+                'recommendations': recs,
+                'count': len(recs)
+            }
+        except Exception as e:
+            results['user_cf'] = {'error': str(e)}
+        
+        # Item-Based CF
+        try:
+            item_cf = ItemBasedCF()
+            item_cf.fit(ratings, len(set(r['item_id'] for r in test_data)))
+            recs = item_cf.recommend(user_id, n_recommendations=10)
+            results['item_cf'] = {
+                'recommendations': recs,
+                'count': len(recs)
+            }
+        except Exception as e:
+            results['item_cf'] = {'error': str(e)}
+        
+        return results
