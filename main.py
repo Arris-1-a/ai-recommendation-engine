@@ -1070,3 +1070,24 @@ class ResultCache:
     
     def __len__(self) -> int:
         return len(self._cache)
+
+
+class ModelExporter:
+    """Export model for production use."""
+    
+    @staticmethod
+    def export_onnx(model: torch.nn.Module, output_path: str) -> str:
+        """Export model to ONNX format."""
+        dummy_input = torch.randn(1, 3, 640, 640)
+        torch.onnx.export(model, dummy_input, output_path, 
+                         input_names=['input'],
+                         output_names=['output'])
+        logger.info(f"Model exported to: {output_path}")
+        return output_path
+    
+    @staticmethod
+    def export_tensorrt(model: torch.nn.Module, output_path: str) -> str:
+        """Export model to TensorRT format (placeholder)."""
+        # This would require TensorRT installation
+        logger.warning("TensorRT export requires additional setup")
+        return output_path
