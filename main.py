@@ -1428,3 +1428,49 @@ class ModelQuantizer:
                          output_names=['output'])
         logger.info(f"Model exported to: {output_path}")
         return output_path
+
+
+class KnowledgeGraph:
+    """Simple knowledge graph for entity relationships."""
+    
+    def __init__(self):
+        self.nodes: Dict[str, Dict] = {}
+        self.edges: List[Tuple[str, str, str]] = []
+    
+    def add_entity(self, entity_id: str, entity_type: str, properties: Dict = None):
+        """Add an entity to the graph."""
+        self.nodes[entity_id] = {
+            'id': entity_id,
+            'type': entity_type,
+            'properties': properties or {}
+        }
+    
+    def add_relationship(self, from_id: str, to_id: str, relationship: str):
+        """Add a relationship between entities."""
+        self.edges.append((from_id, to_id, relationship))
+    
+    def get_related_entities(self, entity_id: str, depth: int = 1) -> List[Dict]:
+        """Get related entities within depth."""
+        related = []
+        for from_id, to_id, rel in self.edges:
+            if from_id == entity_id:
+                related.append({
+                    'entity_id': to_id,
+                    'relationship': rel,
+                    'direction': 'outgoing'
+                })
+            elif to_id == entity_id:
+                related.append({
+                    'entity_id': from_id,
+                    'relationship': rel,
+                    'direction': 'incoming'
+                })
+        return related
+    
+    def get_statistics(self) -> Dict:
+        """Get graph statistics."""
+        return {
+            'nodes': len(self.nodes),
+            'edges': len(self.edges),
+            'types': list(set(n['type'] for n in self.nodes.values()))
+        }
