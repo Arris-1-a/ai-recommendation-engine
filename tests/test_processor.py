@@ -24,3 +24,25 @@ class TestParallelProcessor:
         
         assert parallel.processor is processor
         assert parallel.num_workers == 2
+
+
+class TestPipelineOptimizer:
+    def test_optimize(self):
+        """Test pipeline optimization."""
+        from main import DocumentProcessor, PipelineOptimizer
+        
+        processor = DocumentProcessor()
+        optimizer = PipelineOptimizer(processor)
+        
+        # Test that optimizer is created
+        assert optimizer.processor is processor
+    
+    def test_get_recommendations(self):
+        """Test getting recommendations."""
+        from main import DocumentProcessor, PipelineOptimizer
+        
+        processor = DocumentProcessor()
+        optimizer = PipelineOptimizer(processor)
+        
+        recommendations = optimizer.get_recommendations()
+        assert isinstance(recommendations, list)
