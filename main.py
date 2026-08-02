@@ -1331,3 +1331,27 @@ class ModelComparator:
             results['item_cf'] = {'error': str(e)}
         
         return results
+
+
+class ResultComparator:
+    """Compare processing results."""
+    
+    @staticmethod
+    def compare(results: List[ProcessingResult]) -> Dict:
+        """Compare multiple processing results."""
+        if len(results) < 2:
+            return {"error": "Need at least 2 results to compare"}
+        
+        comparison = {
+            'total_documents': len(results),
+            'total_words': sum(r.metadata.word_count for r in results),
+            'total_entities': sum(len(r.entities) for r in results),
+            'avg_reading_time': sum(r.metadata.reading_time_minutes for r in results) / len(results),
+            'categories': list(set(cat for r in results for cat in r.categories)),
+            'sentiment_distribution': {
+                'positive': sum(1 for r in results if r.sentiments and r.sentiments[0] > 0.1),
+                'negative': sum(1 for r in results if r.sentiments and r.sentiments[0] < -0.1),
+                'neutral': sum(1 for r in results if not r.sentiments or -0.1 <= r.sentiments[0] <= 0.1)
+            }
+        }
+        return comparison
