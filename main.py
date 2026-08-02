@@ -1355,3 +1355,31 @@ class ResultComparator:
             }
         }
         return comparison
+
+
+class ImageStatistics:
+    """Calculate image statistics."""
+    
+    @staticmethod
+    def analyze(image_path: str) -> Dict:
+        """Analyze image statistics."""
+        import cv2
+        img = cv2.imread(image_path)
+        if img is None:
+            return {"error": "Cannot load image"}
+        
+        h, w = img.shape[:2]
+        stats = {
+            'width': w,
+            'height': h,
+            'size_bytes': os.path.getsize(image_path),
+            'mean_brightness': float(np.mean(img)),
+            'std_brightness': float(np.std(img)),
+            'color_channels': img.shape[2] if len(img.shape) > 2 else 1
+        }
+        
+        # Calculate histogram
+        hist = cv2.calcHist([img], [0, 1, 2], None, [8, 8, 8], [0, 256, 0, 256, 0, 256])
+        stats['histogram_bins'] = int(hist.size)
+        
+        return stats
