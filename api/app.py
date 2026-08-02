@@ -99,3 +99,21 @@ async def evaluate(user_id: str, n_recommendations: int = 10):
 async def get_statistics():
     """Get engine statistics."""
     return engine.get_statistics()
+
+
+@app.get("/users")
+async def list_users():
+    """List all users with ratings."""
+    if not engine.is_trained:
+        return {"users": []}
+    users = set(r.user_id for r in engine.hybrid.ratings_cache)
+    return {"users": list(users)}
+
+
+@app.get("/items")
+async def list_items():
+    """List all items."""
+    if not engine.is_trained:
+        return {"items": []}
+    items = set(r.item_id for r in engine.hybrid.ratings_cache)
+    return {"items": list(items)}
