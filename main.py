@@ -1407,3 +1407,24 @@ class ParallelProcessor:
                 except Exception as e:
                     logger.error(f"Processing failed: {e}")
         return results
+
+
+class ModelQuantizer:
+    """Quantize models for deployment."""
+    
+    @staticmethod
+    def quantize_int8(model: torch.nn.Module) -> torch.nn.Module:
+        """Quantize model to INT8."""
+        return torch.quantization.quantize_dynamic(
+            model, {torch.nn.Linear}, dtype=torch.qint8
+        )
+    
+    @staticmethod
+    def export_onnx(model: torch.nn.Module, output_path: str) -> str:
+        """Export model to ONNX format."""
+        dummy_input = torch.randn(1, 3, 640, 640)
+        torch.onnx.export(model, dummy_input, output_path,
+                         input_names=['input'],
+                         output_names=['output'])
+        logger.info(f"Model exported to: {output_path}")
+        return output_path
