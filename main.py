@@ -1209,3 +1209,53 @@ class AsyncProcessor:
         tasks = [self.process_file_async(fp) for fp in filepaths]
         results = await asyncio.gather(*tasks, return_exceptions=True)
         return [r for r in results if r is not None and not isinstance(r, Exception)]
+
+
+class RealtimeDetector:
+    """Real-time object detection from camera."""
+    
+    def __init__(self, recognizer: ImageRecognizer, camera_index: int = 0):
+        self.recognizer = recognizer
+        self.camera_index = camera_index
+    
+    def start(self, show_fps: bool = True):
+        """Start real-time detection."""
+        import cv2
+        cap = cv2.VideoCapture(self.camera_index)
+        
+        if not cap.isOpened():
+            logger.error(f"Cannot open camera {self.camera_index}")
+            return
+        
+        fps_times = []
+        
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                break
+            
+            results = self.recognizer.detector.detect(frame)
+            
+            # Draw detections
+            for det in results:
+                x1, y1, x2, y2 = det.bbox.to_tuple()
+                cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+                cv2.putText(frame, f"{det.class_name} {det.confidence:.2f}",
+                           (x1, y1-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+            
+            # Show FPS
+            if show_fps:
+                fps_times.append(1.0 / max(0.001, 0.016))  # Approximate
+                if len(fps_times) > 30:
+                    fps_times = fps_times[-30:]
+                fps = sum(fps_times) / len(fps_times)
+                cv2.putText(frame, f"FPS: {fps:.1f}", (10, 30),
+                           cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+            
+            cv2.imshow('Real-time Detection', frame)
+            
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+        
+        cap.release()
+        cv2.destroyAllWindows()
