@@ -1185,3 +1185,27 @@ class ContextManager:
             del self.contexts[conv_id]
             return True
         return False
+
+
+class AsyncProcessor:
+    """Async document processing."""
+    
+    def __init__(self, processor: DocumentProcessor, max_concurrent: int = 5):
+        self.processor = processor
+        self.max_concurrent = max_concurrent
+        self.semaphore = asyncio.Semaphore(max_concurrent)
+    
+    async def process_file_async(self, filepath: str) -> Optional[ProcessingResult]:
+        """Process a single file asynchronously."""
+        async with self.semaphore:
+            try:
+                return await asyncio.to_thread(self.processor.process_file, filepath)
+            except Exception as e:
+                logger.error(f"Async processing failed: {e}")
+                return None
+    
+    async def process_batch_async(self, filepaths: List[str]) -> List[ProcessingResult]:
+        """Process multiple files asynchronously."""
+        tasks = [self.process_file_async(fp) for fp in filepaths]
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        return [r for r in results if r is not None and not isinstance(r, Exception)]
