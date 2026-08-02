@@ -1259,3 +1259,36 @@ class RealtimeDetector:
         
         cap.release()
         cv2.destroyAllWindows()
+
+
+class StreamingResponse:
+    """Stream responses for real-time Q&A."""
+    
+    def __init__(self, qa_system: QASystem):
+        self.qa = qa_system
+    
+    async def stream_answer(self, question: str, conversation_id: str = None):
+        """Stream answer token by token."""
+        # For demo, return full answer (would use async generator in production)
+        result = await self.qa.ask(question, conversation_id)
+        
+        # Simulate streaming by yielding parts
+        answer = result.answer
+        chunk_size = 20
+        for i in range(0, len(answer), chunk_size):
+            yield answer[i:i+chunk_size]
+            await asyncio.sleep(0.05)  # Simulate delay
+    
+    async def stream_with_sources(self, question: str):
+        """Stream answer with source citations."""
+        result = await self.qa.ask(question)
+        
+        # Yield sources first
+        yield "[Sources]\n"
+        for i, source in enumerate(result.sources[:3], 1):
+            yield f"{i}. {source.get('id', 'unknown')}\n"
+        
+        yield "\n[Answer]\n"
+        # Then yield answer
+        async for chunk in self.stream_answer(question):
+            yield chunk
